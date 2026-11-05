@@ -1,0 +1,9 @@
+# build output
+dealerdesk
+dealerdesk.exe
+tests/test_calc
+tests/test_calc.exe
+*.o
+
+# IDEs
+.idea/
