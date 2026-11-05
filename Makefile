@@ -1,7 +1,8 @@
 # DealerDesk build
 #
 #   make          build ./dealerdesk  (equivalent to: gcc -o dealerdesk *.c -lm)
-#   make test     build and run the unit tests in tests/
+#   make test     build and run the unit tests (tests/test_calc.c) and the
+#                 end-to-end screen tests (tests/e2e/run.sh)
 #   make clean
 #
 # On Windows with the WinLibs/MinGW toolchain use mingw32-make.
@@ -32,8 +33,9 @@ $(BIN): $(SRC) $(HDR)
 $(TEST): tests/test_calc.c calc.c calc.h
 	$(CC) $(CFLAGS) -I. -o $@ tests/test_calc.c calc.c $(LDLIBS)
 
-test: $(TEST)
+test: $(TEST) $(BIN)
 	./$(TEST)
+	sh tests/e2e/run.sh ./$(BIN)
 
 clean:
 	rm -f dealerdesk dealerdesk.exe tests/test_calc tests/test_calc.exe
