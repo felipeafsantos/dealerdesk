@@ -33,11 +33,12 @@ are wrong.
 
 ```
 make            # builds ./dealerdesk  (same as: gcc -o dealerdesk *.c -lm)
-make test       # builds and runs the unit tests in tests/
+make test       # builds and runs the unit tests and the screen tests in tests/
 make clean
 ```
 
-On Windows with the WinLibs toolchain use `mingw32-make` in place of `make`.
+On Windows with the WinLibs toolchain use `mingw32-make` in place of `make`,
+and run `mingw32-make test` from Git Bash: the screen tests need `sh`.
 CI (`.github/workflows/ci.yml`) runs the same targets on Ubuntu.
 
 ## Code review protocol

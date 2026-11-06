@@ -5,7 +5,8 @@
 #                 end-to-end screen tests (tests/e2e/run.sh)
 #   make clean
 #
-# On Windows with the WinLibs/MinGW toolchain use mingw32-make.
+# On Windows with the WinLibs/MinGW toolchain use mingw32-make, from Git Bash
+# for "make test" (the screen tests need sh).
 
 # plain "=" because make's built-in default CC is "cc", which Windows lacks;
 # "make CC=clang" on the command line still overrides it.
