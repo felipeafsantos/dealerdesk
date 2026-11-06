@@ -82,6 +82,10 @@ Each of these was a question I answered, not an assumption the agent made.
   inside the app is not, because staff see it.
 - The trade screen test uses a 6% salesman discount so it is not confused
   with the 4% fleet rate coming in TICKET-142.
+- One real approval gate on the release (a `production` environment with a
+  required reviewer) rather than simulated dev/test/qa/prd stages. The real
+  deployment is a person copying a binary to the fileserver; a workflow can
+  gate the publish honestly, but it cannot deploy, so it should not pretend to.
 - Plain C assertions rather than a test framework: the thing under test is
   one function, and vendoring Unity would be the largest dependency in the
   repo.

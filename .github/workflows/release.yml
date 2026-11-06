@@ -14,6 +14,12 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-24.04
+    # The "production" environment has a required reviewer (repository
+    # settings -> Environments), so a pushed tag waits for a person to approve
+    # before anything is published. The build and tests run after approval.
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
     steps:
       - uses: actions/checkout@v5
 
