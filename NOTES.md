@@ -89,10 +89,10 @@ recommendation, and the answer is recorded here.
 Built in five steps (plan: `docs/TICKET-142/TICKET-142_PLAN.md`: date mask
 for sale screens, customer flag and marking screen, pricing with tests
 written first, the line on quotes and invoices, docs and version), landed
-as four commits that each build and pass: the plan with the date mask, the
-feature with its tests and the v2.4 bump, the docs, a heading rename. The
-steps were implemented back to back in one tree, so splitting them into
-five commits would have meant staging by hunk; I chose whole-file commits.
+as a short series of whole-file commits that each build and pass: the plan
+with the date mask, the feature with its tests and the v2.4 bump, the docs,
+then follow-up doc fixes from review. The steps were implemented back to
+back in one tree, so one commit per step would have meant staging by hunk.
 
 Decisions the ticket left open, answered before code was written:
 
@@ -108,8 +108,10 @@ Decisions the ticket left open, answered before code was written:
 
 Rollback checked by building v2.3 from master and running it on v2.4 files:
 it loads everything, shows a fleet invoice with one Discounts line and the
-same total, and drops the fleet column when it saves, so after a rollback
-nobody is fleet and no money is lost. The pre-existing empty-phone
+same total, and drops the customer `fleet` column when it saves customers
+(it would likewise drop the invoice `fleet_disc` column if it saved
+invoices; `disc` and `total` are untouched), so after a rollback nobody is
+fleet and no money is lost. The pre-existing empty-phone
 field-shift bug is unchanged.
 
 Every expected screen was read against `calc.c` before being recorded; the

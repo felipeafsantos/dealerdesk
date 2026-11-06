@@ -41,7 +41,7 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
 | `globals.h` | 63 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
 
 Limits (`globals.h:7-9`): 500 vehicles, 500 customers, 2000 invoices. Each
-"add" screen refuses when the table is full (`main.c:87`, `:236`, `:376`).
+"add" screen refuses when the table is full (`main.c:87`, `:242`, `:406`).
 
 Vehicle status codes (`globals.h:12-14`): `0` in stock, `1` reserved, `2` sold.
 
@@ -201,9 +201,11 @@ invoice=50233
 * **Older binaries ignore extra fields on load but drop them on save**,
   because `save_*` writes a fixed format. Checked with the v2.3 binary on
   v2.4 files: it loads every row, shows a fleet invoice with one Discounts
-  line and the same total, and when it saves, the `fleet` column is gone
-  (every customer loads as `N` afterwards). The rollback in RELEASE.txt
-  therefore loses who is a fleet customer, not any money.
+  line and the same total, and when it saves customers, the `fleet` column
+  is gone (every customer loads as `N` afterwards); if it saved invoices the
+  `fleet_disc` column would go the same way, while `disc` and `total` stay.
+  The rollback in RELEASE.txt therefore loses who is a fleet customer, not
+  any money.
 * **Empty fields shift the following ones.** `strtok` treats `||` as a single
   separator, so a customer saved with an empty phone loads with the email in
   `phone` and the type in `email`, and `type` falls back to `'R'`.
@@ -271,9 +273,9 @@ statements.
 | Topic | Docs say | Code does | Where |
 |---|---|---|---|
 | Trade discount | 5% | 10% | `README.md:66`, `main.c:533`, `calc.c:6` vs `calc.c:29`; confirmed by invoice 50231 |
-| Salesman discount cap | 10%, manager PIN above | clamped at 15%, no PIN | `README.md:67`, `main.c:534`, `calc.c:7` vs `calc.c:31-34` |
-| VAT base | list price | net + delivery | `README.md:64-65`, `calc.c:10` vs `calc.c:40` |
-| Delivery and VAT | delivery VAT exempt | delivery is VATable | `README.md:68-69` vs `calc.c:40` |
+| Salesman discount cap | 10%, manager PIN above | clamped at 15%, no PIN | `README.md:67`, `main.c:534`, `calc.c:7` vs `calc.c:37-40` |
+| VAT base | list price | net + delivery | `README.md:64-65`, `calc.c:10` vs `calc.c:46` |
+| Delivery and VAT | delivery VAT exempt | delivery is VATable | `README.md:68-69` vs `calc.c:46` |
 | Plates | upper-cased, spaces stripped | stored as typed; lookup is case-sensitive | `main.c:5-6`, `main.c:532` vs `main.c:93`, `:124` (commit `76169d5`) |
 | Version | v2.1 | v2.3 | `README.md:3` vs `screen.c:18`, `RELEASE.txt:12` |
 | Main menu | has "6. Reports" | no Reports; has "9. Help" | `README.md:52-58` vs `main.c:549-556` (commit `399a544`) |
@@ -296,7 +298,7 @@ the new feature.
   `yf20 hbn` is not found by `YF20 HBN`.
 * `view_invoice` scans all invoices without breaking (`main.c:476-478`); with
   duplicate numbers the last one wins.
-* Trade-in is unvalidated (`calc.c:42`); a negative trade-in increases the
+* Trade-in is unvalidated (`calc.c:48`); a negative trade-in increases the
   total.
 * Table limits are hard (500 / 500 / 2000); the files are rewritten in full.
 * `ctype.h` is included in `main.c` but unused (`main.c:11`).
