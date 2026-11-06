@@ -1,0 +1,5 @@
+# The e2e tests compare program output byte for byte, so these must stay LF
+# on every platform regardless of core.autocrlf.
+tests/e2e/*.in        text eol=lf
+tests/e2e/*.expected  text eol=lf
+tests/e2e/run.sh      text eol=lf

@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build
+        run: make
+
+      - name: Unit tests
+        run: make test
+
+      # The program must start, load data/, exit cleanly on "0", and must not
+      # rewrite the data files just by starting up.
+      - name: Smoke run
+        run: |
+          printf '0\n' | ./dealerdesk > /dev/null
+          git diff --exit-code -- data
