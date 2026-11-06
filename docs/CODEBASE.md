@@ -25,7 +25,7 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
   comment at `dbfile.c:4` claim.
 * **Every change is written to `data/*.dat` immediately** (see section 5).
   After experimenting, restore the sample data with `git checkout -- data`.
-* There is exactly one `main()` (`main.c:509`), so `*.c` is a valid build. Any
+* There is exactly one `main()` (`main.c:542`), so `*.c` is a valid build. Any
   extra `.c` file placed in the root would be swept into the build, which is
   why tests live under `tests/` (see section 10).
 * Version string "v2.3" is printed by `header()` at `screen.c:18`.
@@ -34,14 +34,14 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
 
 | File | Lines | Role |
 |---|---|---|
-| `main.c` | 540 | All menus and screens. Defines the global tables and ID counters (`main.c:18-27`). |
-| `calc.c`, `calc.h` | 45 / 20 | Pricing. `QUOTE` struct (`calc.h:4-15`), `rnd2()` (`calc.c:18`), `calc_quote()` (`calc.c:23`). Pure functions, no globals, no I/O. |
-| `dbfile.c`, `dbfile.h` | 229 / 10 | Load and save the four flat files. `load_all()` (`dbfile.c:156`), `save_stock/customers/invoices/ids()` (`dbfile.c:164-229`). |
+| `main.c` | 573 | All menus and screens. Defines the global tables and ID counters (`main.c:18-27`). |
+| `calc.c`, `calc.h` | 51 / 22 | Pricing. `QUOTE` struct (`calc.h:4-16`), `rnd2()` (`calc.c:19`), `calc_quote()` (`calc.c:24`). Pure functions, no globals, no I/O. |
+| `dbfile.c`, `dbfile.h` | 234 / 10 | Load and save the four flat files. `load_all()` (`dbfile.c:160`), `save_stock/customers/invoices/ids()` (`dbfile.c:168-233`). |
 | `screen.c`, `screen.h` | 70 / 12 | Terminal helpers: `cls`, `header`, `read_line`, `read_int`, `read_money`, `pause_enter`, `confirm`. |
-| `globals.h` | 61 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
+| `globals.h` | 63 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
 
 Limits (`globals.h:7-9`): 500 vehicles, 500 customers, 2000 invoices. Each
-"add" screen refuses when the table is full (`main.c:87`, `:236`, `:376`).
+"add" screen refuses when the table is full (`main.c:87`, `:242`, `:406`).
 
 Vehicle status codes (`globals.h:12-14`): `0` in stock, `1` reserved, `2` sold.
 
@@ -51,15 +51,15 @@ Functions in `main.c`:
 |---|---|
 | Lookup | `status_txt` :29, `find_veh` :40, `find_cust` :49 (linear scans by id) |
 | Stock | `list_stock` :60, `add_vehicle` :81, `find_plate` :116, `change_price` :138, `reserve_vehicle` :162, `stock_menu` :180 |
-| Customers | `print_cust_row` :211, `list_customers` :218, `add_customer` :231, `find_customer` :260, `customer_menu` :278 |
-| Quotes and sales | `build_quote` :303, `print_quote` :332, `quote_screen` :354, `sell_vehicle` :367 |
-| Invoices | `list_invoices` :418, `view_invoice` :436, `invoice_menu` :472 |
-| Other | `help_screen` :495, `main` :509 |
+| Customers | `cust_type_txt` :211, `print_cust_row` :218, `list_customers` :224, `add_customer` :237, `find_customer` :267, `mark_fleet` :285, `customer_menu` :304 |
+| Quotes and sales | `build_quote` :331, `print_quote` :360, `quote_screen` :384, `sell_vehicle` :397 |
+| Invoices | `list_invoices` :449, `view_invoice` :467, `invoice_menu` :505 |
+| Other | `help_screen` :528, `main` :542 |
 
 ## 3. Menu map
 
 ```
-Main (main.c:516)
+Main (main.c:549)
   1 Stock (stock_menu, main.c:180)
       1 List stock                 list_stock(0)   hides sold vehicles
       2 List all incl. sold        list_stock(1)
@@ -68,14 +68,16 @@ Main (main.c:516)
       5 Change price               change_price    ignores price <= 0
       6 Reserve / release          reserve_vehicle toggles 0 <-> 1, refuses sold
       0 Back
-  2 Customers (customer_menu, main.c:278)
+  2 Customers (customer_menu, main.c:304)
       1 List customers             list_customers
-      2 Add customer               add_customer    name required; "Trade (Y/N)?" sets type
+      2 Add customer               add_customer    name required; "Trade (Y/N)?" sets type,
+                                                   "Fleet (Y/N)?" sets fleet
       3 Find customer              find_customer   substring match on name (strstr)
+      4 Mark / unmark fleet        mark_fleet      toggles fleet Y/N by ID, saves (v2.4)
       0 Back
   3 Quote                          quote_screen    prints quote, saves nothing
   4 Sell vehicle                   sell_vehicle    quote -> preview -> Y/N -> invoice
-  5 Invoices (invoice_menu, main.c:472)
+  5 Invoices (invoice_menu, main.c:505)
       1 List invoices              list_invoices
       2 View invoice               view_invoice
       0 Back
@@ -83,8 +85,8 @@ Main (main.c:516)
   0 Exit
 ```
 
-Quote and Sell share `build_quote()` (`main.c:303`): vehicle ID, customer ID,
-discount %, trade-in. A sold vehicle cannot be quoted or sold (`main.c:314`).
+Quote and Sell share `build_quote()` (`main.c:331`): vehicle ID, customer ID,
+discount %, trade-in. A sold vehicle cannot be quoted or sold (`main.c:342`).
 A reserved vehicle can be.
 
 ## 4. Input model
@@ -140,40 +142,44 @@ id|plate|make|model|year|mileage|cost|price|status
 1003|BD68 KWP|Volkswagen|Golf 1.5 TSI Life|2018|52300|11200.00|15995.00|0
 ```
 
-Load `dbfile.c:21-60`, save `dbfile.c:164-180`. Field widths: plate 12, make
+Load `dbfile.c:21-60`, save `dbfile.c:168-184`. Field widths: plate 12, make
 24, model 40 (including the terminator). Plates are stored exactly as typed;
 the sample data has mixed case (`yf20 hbn`).
 
-### `data/customers.dat`: `CUSTOMER` (`globals.h:28-34`)
+### `data/customers.dat`: `CUSTOMER` (`globals.h:28-35`)
 
 ```
-id|name|phone|email|type
-2008|Greenway Taxis|01632 960702|fleet@greenwaytaxis.example|R
+id|name|phone|email|type|fleet
+2008|Greenway Taxis|01632 960702|fleet@greenwaytaxis.example|R|Y
 ```
 
-Load `dbfile.c:62-93`, save `dbfile.c:182-197`. `type` is one character: `R`
-retail or `T` trade. A missing type field defaults to `'R'` (`dbfile.c:89`).
-Only `'T'` is ever tested for (`main.c:215`, `:336`, `calc.c:28`); any other
-character behaves as retail.
+Load `dbfile.c:62-95`, save `dbfile.c:186-201`. `type` is one character: `R`
+retail or `T` trade; a missing type field defaults to `'R'`. Only `'T'` is
+ever tested for; any other character behaves as retail. `fleet` (since
+v2.4) is `Y` or `N`; a missing or any other value loads as `N`, so files
+written before v2.4 load unchanged. Type and fleet are independent: a
+customer can be trade and fleet.
 
-### `data/invoices.dat`: `INVOICE` (`globals.h:36-48`)
+### `data/invoices.dat`: `INVOICE` (`globals.h:37-50`)
 
 ```
-no|date|veh_id|cust_id|list|disc|net|vat|fees|tradein|total
-50230|2021-02-11|1009|2003|9295.00|464.75|8830.25|1796.05|205.00|1500.00|9331.30
+no|date|veh_id|cust_id|list|disc|net|vat|fees|tradein|total|fleet_disc
+50230|2021-02-11|1009|2003|9295.00|464.75|8830.25|1796.05|205.00|1500.00|9331.30|0.00
 ```
 
-Load `dbfile.c:95-138`, save `dbfile.c:199-215`. Written by `sell_vehicle()`
-(`main.c:392-406`):
+Load `dbfile.c:97-142`, save `dbfile.c:203-220`. Written by `sell_vehicle()`:
 
-* `disc` is **all discounts added together** (`main.c:400`:
-  `trade_disc + disc`). The saved invoice cannot tell a trade discount from a
-  salesman discount.
-* `fees` is delivery plus registration (`main.c:403`), 205.00 today.
-* `date` is `YYYY-MM-DD` from `time(NULL)` (`main.c:395-396`).
-* `view_invoice()` prints one combined "Discounts" line (`main.c:461`). The
-  per-discount lines exist only on the quote and the invoice preview
-  (`print_quote`, `main.c:340-343`).
+* `disc` is **all discounts added together** (trade + fleet + salesman).
+  The saved invoice cannot tell a trade discount from a salesman discount.
+* `fleet_disc` (since v2.4) is the fleet part of `disc`, stored so the
+  invoice can show it as its own line later. A missing field loads as 0, so
+  files written before v2.4 load unchanged.
+* `fees` is delivery plus registration, 205.00 today.
+* `date` is `YYYY-MM-DD` from `time(NULL)`.
+* `view_invoice()` prints "Fleet discount" only when `fleet_disc` is
+  non-zero, then one "Discounts" line for the rest (`disc - fleet_disc`).
+  Invoices display stored amounts; a customer's current fleet flag does not
+  change an issued invoice.
 
 ### `data/next_ids.dat`
 
@@ -183,8 +189,8 @@ customer=2009
 invoice=50233
 ```
 
-`key=value` lines read with `sscanf` (`dbfile.c:148-152`), written at
-`dbfile.c:226`. Defaults if the file is missing: 1000 / 2000 / 50000
+`key=value` lines read with `sscanf` (`dbfile.c:152-156`), written at
+`dbfile.c:231`. Defaults if the file is missing: 1000 / 2000 / 50000
 (`main.c:25-27`). IDs are never reused.
 
 ### Compatibility behaviour of the loaders
@@ -193,35 +199,42 @@ invoice=50233
   as `t ? value : 0` (or `'R'` for customer type). So a record format can
   gain a field at the end and old files still load without conversion.
 * **Older binaries ignore extra fields on load but drop them on save**,
-  because `save_*` writes a fixed format.
+  because `save_*` writes a fixed format. Checked with the v2.3 binary on
+  v2.4 files: it loads every row, shows a fleet invoice with one Discounts
+  line and the same total, and when it saves customers, the `fleet` column
+  is gone (every customer loads as `N` afterwards); if it saved invoices the
+  `fleet_disc` column would go the same way, while `disc` and `total` stay.
+  The rollback in RELEASE.txt therefore loses who is a fleet customer, not
+  any money.
 * **Empty fields shift the following ones.** `strtok` treats `||` as a single
   separator, so a customer saved with an empty phone loads with the email in
   `phone` and the type in `email`, and `type` falls back to `'R'`.
-  `add_customer` allows empty phone and email (`main.c:243-244`), so existing
+  `add_customer` allows empty phone and email (`main.c:249-250`), so existing
   data may already contain such rows. This is a pre-existing bug, not fixed
   here, and it affects any new trailing field in the same way.
 * The whole file is rewritten on each save. If a save fails, an error line is
-  printed (`dbfile.c:171`, `:189`, `:207`, `:223`) and the program carries on.
+  printed (`dbfile.c:175`, `:193`, `:210`, `:228`) and the program carries on.
 
 ## 6. Pricing rules as implemented
 
-Everything is in `calc_quote()` (`calc.c:23-45`), called only from
-`build_quote()` (`main.c:326`) with the vehicle's list price, the customer type
+Everything is in `calc_quote()` (`calc.c:24-51`), called only from
+`build_quote()` (`main.c:354`) with the vehicle's list price, the customer type
 character, the typed discount percentage and the typed trade-in value.
 
 | Step | Code | Rule |
 |---|---|---|
-| Trade discount | `calc.c:27-29` | `type == 'T'` gets **10%** of list price, rounded to pennies. Retail gets 0. |
-| Salesman discount % | `calc.c:31-35` | Clamped to **0..15**. No manager PIN. |
-| Salesman discount | `calc.c:36` | `(list - trade_disc) * pct / 100`, rounded. Applied **after** the trade discount. |
-| Net price | `calc.c:38` | `list - trade_disc - disc`. Not rounded (its inputs already are). |
-| Delivery | `calc.c:39` | Fixed 150.00. |
-| VAT | `calc.c:40` | **20% of (net + delivery)**, rounded. Delivery is VATable. |
-| Registration fee | `calc.c:41` | Fixed 55.00, outside VAT. |
-| Trade-in | `calc.c:42` | Taken as typed, not validated, may be negative or exceed the total. |
-| Total | `calc.c:44` | `net + delivery + vat + reg_fee - tradein`. |
+| Trade discount | `calc.c:29-31` | `type == 'T'` gets **10%** of list price, rounded to pennies. Retail gets 0. |
+| Fleet discount | `calc.c:33-35` | fleet customers get **4%** of list price, rounded. Independent of the trade discount; a trade+fleet customer gets both. (v2.4) |
+| Salesman discount % | `calc.c:37-41` | Clamped to **0..15**. No manager PIN. |
+| Salesman discount | `calc.c:42` | `(list - trade_disc - fleet_disc) * pct / 100`, rounded. Applied **after** the trade and fleet discounts. |
+| Net price | `calc.c:44` | `list - trade_disc - fleet_disc - disc`. Not rounded (its inputs already are). |
+| Delivery | `calc.c:45` | Fixed 150.00. |
+| VAT | `calc.c:46` | **20% of (net + delivery)**, rounded. Delivery is VATable. |
+| Registration fee | `calc.c:47` | Fixed 55.00, outside VAT. |
+| Trade-in | `calc.c:48` | Taken as typed, not validated, may be negative or exceed the total. |
+| Total | `calc.c:50` | `net + delivery + vat + reg_fee - tradein`. |
 
-Rounding: `rnd2(x) = floor(x * 100 + 0.5) / 100` (`calc.c:18-21`), i.e. round
+Rounding: `rnd2(x) = floor(x * 100 + 0.5) / 100` (`calc.c:19-22`), i.e. round
 half up at the penny.
 
 Relevant history (`git log`): `9dc21bb` "vat on the discounted price not list
@@ -259,65 +272,66 @@ statements.
 
 | Topic | Docs say | Code does | Where |
 |---|---|---|---|
-| Trade discount | 5% | 10% | `README.md:66`, `main.c:500`, `calc.c:6` vs `calc.c:29`; confirmed by invoice 50231 |
-| Salesman discount cap | 10%, manager PIN above | clamped at 15%, no PIN | `README.md:67`, `main.c:501`, `calc.c:7` vs `calc.c:31-34` |
-| VAT base | list price | net + delivery | `README.md:64-65`, `calc.c:10` vs `calc.c:40` |
-| Delivery and VAT | delivery VAT exempt | delivery is VATable | `README.md:68-69` vs `calc.c:40` |
-| Plates | upper-cased, spaces stripped | stored as typed; lookup is case-sensitive | `main.c:5-6`, `main.c:499` vs `main.c:93`, `:124` (commit `76169d5`) |
+| Trade discount | 5% | 10% | `README.md:66`, `main.c:533`, `calc.c:6` vs `calc.c:29`; confirmed by invoice 50231 |
+| Salesman discount cap | 10%, manager PIN above | clamped at 15%, no PIN | `README.md:67`, `main.c:534`, `calc.c:7` vs `calc.c:37-40` |
+| VAT base | list price | net + delivery | `README.md:64-65`, `calc.c:10` vs `calc.c:46` |
+| Delivery and VAT | delivery VAT exempt | delivery is VATable | `README.md:68-69` vs `calc.c:46` |
+| Plates | upper-cased, spaces stripped | stored as typed; lookup is case-sensitive | `main.c:5-6`, `main.c:532` vs `main.c:93`, `:124` (commit `76169d5`) |
 | Version | v2.1 | v2.3 | `README.md:3` vs `screen.c:18`, `RELEASE.txt:12` |
-| Main menu | has "6. Reports" | no Reports; has "9. Help" | `README.md:52-58` vs `main.c:516-523` (commit `399a544`) |
+| Main menu | has "6. Reports" | no Reports; has "9. Help" | `README.md:52-58` vs `main.c:549-556` (commit `399a544`) |
 | Build line | `main.c dbfile.c screen.c report.c` | `report.c` does not exist, `calc.c` and `-lm` are needed | `README.md:29` |
 | Data location | `C:\DEALERDESK\DATA` | `./data/` relative to the working directory | `README.md:39`, `dbfile.c:4` vs `dbfile.c:13` |
 
 The README has since been corrected against this table (it is a developer
-document). The help screen inside the app (`main.c:495-505`) is staff-facing
+document). The help screen inside the app (`main.c:528-538`) is staff-facing
 and is left as it is; the brief says staff should notice nothing apart from
 the new feature.
 
 ## 8. Known quirks and risks
 
 * Exit code is always 0, including on EOF (`screen.c:31`).
-* Invoice dates come from the wall clock (`main.c:395`); `localtime()` is not
-  NULL-checked (`main.c:396`).
+* Invoice dates come from the wall clock (`main.c:425`); `localtime()` is not
+  NULL-checked (`main.c:426`).
 * ANSI clear-screen codes are printed before every screen (`screen.c:11`),
   including when stdout is a pipe.
 * `find_plate` is an exact, case-sensitive match (`main.c:124`), so
   `yf20 hbn` is not found by `YF20 HBN`.
-* `view_invoice` scans all invoices without breaking (`main.c:445-447`); with
+* `view_invoice` scans all invoices without breaking (`main.c:476-478`); with
   duplicate numbers the last one wins.
-* Trade-in is unvalidated (`calc.c:42`); a negative trade-in increases the
+* Trade-in is unvalidated (`calc.c:48`); a negative trade-in increases the
   total.
 * Table limits are hard (500 / 500 / 2000); the files are rewritten in full.
 * `ctype.h` is included in `main.c` but unused (`main.c:11`).
 * The pipe-separator bug with empty fields (section 5).
 
-## 9. Notes for TICKET-142 (fleet discount)
+## 9. TICKET-142 as implemented (v2.4)
 
-Facts the implementation has to respect. Decisions are not made here.
+Decisions, each taken after asking rather than assumed (see NOTES.md):
 
-* **Customer flag.** `CUSTOMER` (`globals.h:28-34`) has only `type` (`R`/`T`).
-  A fleet marker can be a new sixth field in `customers.dat`; the loader
-  (`dbfile.c:88-89`) already tolerates a missing trailing field, so existing
-  files load unchanged. Reusing `type = 'F'` would also load, but older code
-  would print it as "Retail" and it cannot express a customer who is both
-  trade and fleet.
-* **Pricing.** The only place to add the 4% is `calc_quote()` (`calc.c:23`),
-  and the `QUOTE` struct (`calc.h:4-15`) needs a `fleet_disc` field so
-  `print_quote()` (`main.c:332`) can show it as its own line, like
-  `trade_disc` at `main.c:340-341`. Delivery and registration must stay
-  untouched.
-* **Invoices.** The saved invoice holds one combined `disc` (`main.c:400`) and
-  `view_invoice` prints one "Discounts" line (`main.c:461`). Showing a separate
-  "Fleet discount" line on **stored** invoices needs a new invoice field,
-  appended at the end so old rows load with it as 0 and display as today.
-* **Open questions to decide and write down:** whether fleet and trade stack
-  when a customer is both; whether the 4% is taken from the list price or
-  after the trade discount; order of the fleet line relative to the salesman
-  discount; whether the salesman discount is then applied to the price net of
-  the fleet discount (as it is for trade, `calc.c:36`).
-* **Regression guard.** Non-fleet quotes and invoices must be unchanged to
-  the penny. The three sample invoices and the worked example above are the
-  reference values.
+* **Customer flag.** A sixth `fleet` field (`Y`/`N`) appended to
+  `customers.dat`, not a new `type` letter, so type and fleet are independent
+  and a trade customer can also be fleet. Missing or other values load as
+  `N`. Staff mark or unmark a customer with Customers option 4
+  (`mark_fleet`, `main.c`), and Add customer asks "Fleet customer (Y/N)?"
+  after the trade question. The TYPE column and the quote header show
+  Retail, Trade, Fleet or Trade+Fleet (`cust_type_txt`).
+* **Pricing.** `calc_quote()` takes a `fleet` flag and fills
+  `QUOTE.fleet_disc` with 4% of the list price, rounded. Trade and fleet
+  both come off the list price; the salesman percentage applies to what is
+  left. Delivery, registration, VAT base and trade-in are unchanged.
+* **Quotes.** "Fleet discount" is printed after the trade line, only when
+  non-zero, in `print_quote`.
+* **Invoices.** `INVOICE.fleet_disc` is a twelfth field; `disc` still holds
+  every discount, so totals and old rows are unchanged. `view_invoice`
+  prints the fleet line only when non-zero and "Discounts" for the rest, so
+  invoices issued before v2.4 display exactly as before. The stored amount
+  is what is shown; unmarking the customer later does not change it.
+* **Regression guard.** The three sample invoices and the worked example in
+  section 6 still reproduce (unit tests), and `quote_retail` and
+  `quote_trade` changed only on the version line.
+* **Known, unchanged.** A customer row with an empty phone or email still
+  shifts the later fields (section 5), so such a row cannot be a fleet
+  customer until the row is fixed by hand.
 
 ## 10. Tests
 
@@ -338,7 +352,8 @@ clear-screen sequence and any CR, and diffs the whole output against
 `<case>.expected`. They cover what the unit tests cannot: loading the data
 files, the lookups, and the exact lines and labels printed. The repository's
 `data/` is never written. `.gitattributes` keeps these files LF on every
-platform because the comparison is byte for byte.
+platform because the comparison is byte for byte. Today's date is replaced
+by `<TODAY>` so sale cases are deterministic.
 
 **Adding a screen case.** Write `<case>.in` as the keystrokes a user would
 type, one per line, including the blank line for every "Press ENTER" and a
@@ -347,7 +362,11 @@ screen against `calc.c`, and only then save the output as `<case>.expected`.
 Never generate an expected file without checking it: a wrong expected file
 pins a bug.
 
-**Not covered, and why.** Selling a vehicle writes an invoice dated from the
-wall clock, so its output is not deterministic without masking; the stock,
-customer and invoice list screens are not exercised. The CI smoke run only
+**Cases.** `quote_retail` and `quote_trade` (the original quote screens),
+`customers_fleet` (mark, unknown ID, list, unmark, list), `quote_fleet`
+(Greenway Taxis on vehicle 1002, total 12901.24) and `sell_fleet` (sell to
+a fleet customer, view the new and a 2021 invoice, unmark, view again).
+
+**Not covered, and why.** The stock and find screens, and Add customer, are
+not exercised beyond what the cases above touch. The CI smoke run only
 proves that starting the program and exiting does not rewrite `data/`.

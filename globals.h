@@ -31,6 +31,7 @@ typedef struct {
     char phone[20];
     char email[64];
     char type;          /* R = retail, T = trade */
+    char fleet;         /* Y = fleet customer, N = not */
 } CUSTOMER;
 
 typedef struct {
@@ -45,6 +46,7 @@ typedef struct {
     double fees;
     double tradein;
     double total;
+    double fleet_disc;  /* fleet discount, already included in disc */
 } INVOICE;
 
 extern VEHICLE  veh[MAX_VEH];

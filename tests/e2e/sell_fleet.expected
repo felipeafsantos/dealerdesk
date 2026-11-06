@@ -1,0 +1,246 @@
+==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer 2008 is now a fleet customer.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                 Sell Vehicle
+==============================================================
+
+  Vehicle ID  :   Customer ID :   Discount %  :   Trade-in    : 
+  INVOICE PREVIEW
+  ----------------------------------------------
+  Customer : Greenway Taxis (Fleet)
+  Vehicle  : yf20 hbn Vauxhall Corsa 1.2 SE
+  ----------------------------------------------
+  List price                   10995.00
+  Fleet discount                -439.80
+  Net price                    10555.20
+  Delivery                       150.00
+  VAT 20%                       2141.04
+  Registration fee                55.00
+  ==============================================
+  TOTAL                        12901.24
+
+  Confirm sale (Y/N)? 
+  Invoice 50233 created.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                     Invoices
+==============================================================
+
+  1. List invoices
+  2. View invoice
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                 View Invoice
+==============================================================
+
+  Invoice no : 
+  INVOICE 50233    Date: <TODAY>
+  ----------------------------------------------
+  Customer : Greenway Taxis
+  Vehicle  : yf20 hbn Vauxhall Corsa 1.2 SE
+  ----------------------------------------------
+  List price                   10995.00
+  Fleet discount                -439.80
+  Discounts                       -0.00
+  Net price                    10555.20
+  Fees                           205.00
+  VAT                           2141.04
+  ==============================================
+  TOTAL                        12901.24
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                     Invoices
+==============================================================
+
+  1. List invoices
+  2. View invoice
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                 View Invoice
+==============================================================
+
+  Invoice no : 
+  INVOICE 50232    Date: 2021-03-29
+  ----------------------------------------------
+  Customer : Greenway Taxis
+  Vehicle  : LK19 XRT Ford Fiesta 1.0 EcoBoost Zetec
+  ----------------------------------------------
+  List price                   10495.00
+  Discounts                     -839.60
+  Net price                     9655.40
+  Fees                           205.00
+  VAT                           1961.08
+  ==============================================
+  TOTAL                        11821.48
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                     Invoices
+==============================================================
+
+  1. List invoices
+  2. View invoice
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer 2008 is no longer a fleet customer.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                     Invoices
+==============================================================
+
+  1. List invoices
+  2. View invoice
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                 View Invoice
+==============================================================
+
+  Invoice no : 
+  INVOICE 50233    Date: <TODAY>
+  ----------------------------------------------
+  Customer : Greenway Taxis
+  Vehicle  : yf20 hbn Vauxhall Corsa 1.2 SE
+  ----------------------------------------------
+  List price                   10995.00
+  Fleet discount                -439.80
+  Discounts                       -0.00
+  Net price                    10555.20
+  Fees                           205.00
+  VAT                           2141.04
+  ==============================================
+  TOTAL                        12901.24
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                     Invoices
+==============================================================
+
+  1. List invoices
+  2. View invoice
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: 
+  Goodbye.

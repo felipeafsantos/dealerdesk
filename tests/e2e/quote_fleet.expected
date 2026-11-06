@@ -1,0 +1,84 @@
+==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer 2008 is now a fleet customer.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                        Quote
+==============================================================
+
+  Vehicle ID  :   Customer ID :   Discount %  :   Trade-in    : 
+  QUOTATION (valid 7 days)
+  ----------------------------------------------
+  Customer : Greenway Taxis (Fleet)
+  Vehicle  : yf20 hbn Vauxhall Corsa 1.2 SE
+  ----------------------------------------------
+  List price                   10995.00
+  Fleet discount                -439.80
+  Net price                    10555.20
+  Delivery                       150.00
+  VAT 20%                       2141.04
+  Registration fee                55.00
+  ==============================================
+  TOTAL                        12901.24
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: 
+  Goodbye.

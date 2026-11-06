@@ -1,6 +1,6 @@
 This standard disclaimer states that the work is entirely fictional and any resemblance to real people, places, or events is coincidental.
 
-DEALERDESK v2.3
+DEALERDESK v2.4
 ===============
 
 Dealer management for the showroom: stock, customers, quotes and invoices.
@@ -71,8 +71,11 @@ PRICING RULES
 -------------
 
 * Trade customers get a 10% trade discount off the list price.
+* Fleet customers get a 4% fleet discount off the list price. A customer can
+  be both trade and fleet, and then gets both. Mark a customer as fleet from
+  the Customers menu.
 * Salesman discount is up to 15% and is taken off the price after the trade
-  discount. There is no manager PIN.
+  and fleet discounts. There is no manager PIN.
 * VAT (20%) is calculated on the net price plus delivery.
 * Delivery (150.00) is added to every sale and is VATable.
 * First registration (55.00) is added to every sale and is outside VAT.

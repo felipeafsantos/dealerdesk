@@ -87,6 +87,8 @@ static void load_customers(void)
         cpy(c->email, t, sizeof c->email);
         t = strtok(NULL, "|");
         c->type = t ? t[0] : 'R';
+        t = strtok(NULL, "|");
+        c->fleet = (t && t[0] == 'Y') ? 'Y' : 'N';
         ncust++;
     }
     fclose(f);
@@ -132,6 +134,8 @@ static void load_invoices(void)
         i->tradein = t ? atof(t) : 0;
         t = strtok(NULL, "|");
         i->total = t ? atof(t) : 0;
+        t = strtok(NULL, "|");
+        i->fleet_disc = t ? atof(t) : 0;
         ninv++;
     }
     fclose(f);
@@ -190,9 +194,9 @@ void save_customers(void)
         return;
     }
     for (i = 0; i < ncust; i++)
-        fprintf(f, "%d|%s|%s|%s|%c\n",
+        fprintf(f, "%d|%s|%s|%s|%c|%c\n",
                 cust[i].id, cust[i].name, cust[i].phone, cust[i].email,
-                cust[i].type);
+                cust[i].type, cust[i].fleet);
     fclose(f);
 }
 
@@ -207,10 +211,11 @@ void save_invoices(void)
         return;
     }
     for (i = 0; i < ninv; i++)
-        fprintf(f, "%d|%s|%d|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f\n",
+        fprintf(f, "%d|%s|%d|%d|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f|%.2f\n",
                 inv[i].no, inv[i].date, inv[i].veh_id, inv[i].cust_id,
                 inv[i].list, inv[i].disc, inv[i].net, inv[i].vat,
-                inv[i].fees, inv[i].tradein, inv[i].total);
+                inv[i].fees, inv[i].tradein, inv[i].total,
+                inv[i].fleet_disc);
     fclose(f);
 }
 

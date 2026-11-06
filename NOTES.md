@@ -1,131 +1,124 @@
 # NOTES
 
-Felipe Santos, DealerDesk take-home. Branch `delivery/docs-and-ci`.
+Felipe Santos, DealerDesk take-home.
 
 ## What changed, and why in that order
 
-The brief says nobody trusts the docs, there are no tests, no CI, no reliable
-build and releases are by hand. Before touching any of that I read the code
-and found three things that set the priorities: the pricing is one pure
-function (`calc_quote` in `calc.c`), every bit of input goes through `fgets`
-so the whole app can be driven by a text file on stdin, and the three
-invoices shipped in `data/invoices.dat` reproduce the current code to the
-penny. So the cheapest, highest-value work was about trust and repeatability,
-not tooling breadth.
+Reading the code first set the priorities: pricing is one pure function
+(`calc_quote`), all input goes through `fgets` so the app can be driven from a
+text file, and the three invoices in `data/invoices.dat` reproduce the current
+code to the penny. So the work went after trust and repeatability, not
+tooling breadth.
 
 1. **Know the real behaviour.** `docs/CODEBASE.md` describes the code as it
    is, with line references, and lists nine places where the README and
-   comments are wrong (the trade discount is 10%, not 5%; VAT is on net plus
-   delivery, not on list; there is no manager PIN; and so on). Everything
-   after this was built on the code, not the docs.
-2. **One-command build.** A `Makefile` with `-Wall -Wextra`. The code
-   compiles clean, so this costs nothing and removes "build by hand with the
-   right flags".
-3. **Regression safety net.** `tests/test_calc.c`: 39 plain-C checks, no
-   framework, pinned to the three real invoices plus the clamp, the fixed
-   fees, the VAT base, the trade-in and the rounding. This is what makes
-   "unchanged to the penny" provable rather than hoped.
-4. **CI on every push and pull request.** GitHub Actions runs the build, the
-   tests and a smoke run that proves starting the program does not rewrite
-   `data/`.
-5. **Screen tests.** `tests/e2e/run.sh` pipes a script into the real binary
-   in a temporary copy of `data/` and diffs the quote screen for a retail and
-   a trade customer. The unit tests cannot see a wrong or missing line on the
-   screen, and the fleet discount is exactly that kind of change.
-6. **Release by tag.** A second workflow builds, tests and publishes a GitHub
-   Release on any `v*` tag. `RELEASE.txt` now describes that instead of
-   "build on your machine and test it a bit".
-
-The README was corrected after that, because it is a developer document and
-the brief says to start with it. The in-app help screen is staff-facing and
-was left alone.
+   comments were wrong (trade discount 10% not 5%, VAT on net plus delivery,
+   no manager PIN, and so on). Everything after was built on the code.
+2. **One-command build.** `Makefile` with `-Wall -Wextra`; the code compiles
+   clean.
+3. **Regression safety net.** `tests/test_calc.c`, plain C with no
+   framework, pinned to the three real invoices plus the clamp, fixed fees,
+   VAT base, trade-in and rounding. "Unchanged to the penny" became provable.
+4. **CI on every push and pull request**, including a smoke run that proves
+   starting the program does not rewrite `data/`.
+5. **Screen tests.** `tests/e2e/run.sh` pipes a script into the real binary in
+   a temporary copy of `data/` and diffs the screens. Unit tests cannot see a
+   missing line on a quote; the fleet discount is exactly that.
+6. **Release.** Merging a version bump to master builds, tests, tags and
+   publishes a GitHub Release after one human approval; a Rollback workflow
+   marks an earlier release as latest; CI refuses a program change without a
+   version bump. `RELEASE.txt` describes it. The README was then corrected
+   (a developer document); the in-app help screen was left alone (staff see
+   it).
 
 ## How I worked with the agent
 
-Claude Code, driven through `AGENTS.md` (the rules any tool reads;
-`CLAUDE.md` imports it) and a `reviewer` agent, all committed. The rules I
-gave it: never commit or push (I do those by hand, so every commit message
-was reviewed by me first); the code, not the README, is
-the source of truth; staff must notice nothing; and when something is
-unclear, ask rather than assume. The last rule replaced the agent's own
-instinct to "make a reasonable call and write it down".
+Claude Code, driven by `AGENTS.md` (rules any tool reads; `CLAUDE.md`
+imports it) and a committed `reviewer` agent. My rules: never commit or push
+(I do those by hand, so I read every message); the code, not the README, is
+the source of truth; staff must notice nothing; when unclear, ask rather than
+assume. That last rule replaced the agent's instinct to "make a reasonable
+call and write it down": every decision below was a question put to me with
+a recommendation.
 
-The order was deliberate: explore and document first, then tests pinned to
-real data, then automation. The agent did the exploration with a subagent,
-reported the docs-vs-code discrepancies, and I used that to decide what to
-pin before any build tooling existed. The branch was then reviewed by the
-`reviewer` agent, which rebuilt, re-ran the tests, recomputed every pinned
-number and found no blocking issues. It did catch that `make test` needs
-`sh` on PATH, which fails from plain cmd on Windows and only worked here
-because Git Bash was on the PATH, plus stale README line numbers in the
-codebase doc after the README was corrected. Both are fixed.
+The agent explored with a subagent and reported the docs-vs-code gaps before
+any tooling existed. Each branch was reviewed by the `reviewer` agent, which
+rebuilds, re-runs the tests and recomputes every pinned number.
 
-**Where it got something wrong.** The first `Makefile` set the compiler with
-`CC ?= gcc`. GNU make has a built-in default of `cc`, so the `?=` never took
-effect, and the first `mingw32-make` on Windows failed with "cannot find the
-file specified". The agent caught it only because it ran the build instead
-of declaring it done; the fix is a plain `CC = gcc`, which the command line
-can still override. Smaller one: an HTML preview of the docs loaded a script
-from a CDN and rendered blank in the app's panel. Both are the same lesson:
-run the thing, do not trust the diff.
+**Where it got things wrong, and how I caught it.**
+
+- The first `Makefile` used `CC ?= gcc`. GNU make's built-in default `cc`
+  wins over `?=`, so the first Windows build failed with "cannot find the
+  file specified". Caught by running the build; fixed with `CC = gcc`.
+- The CI version gate was a no-op on GitHub: on a shallow pull-request
+  checkout `git diff A...B` has no merge base, git fails, and the pipe into
+  grep hid it, so the step passed. The reviewer agent reproduced this with a
+  simulated checkout. Fixed with a two-dot diff and an explicit exit.
+- The reviewer also caught that `make test` needs `sh` on PATH (fails from
+  plain cmd on Windows) and stale line numbers in the codebase doc after
+  the README was corrected. Same lesson each time: run it, do not trust the
+  diff.
 
 ## Assumptions and decisions
 
-Each of these was a question I answered, not an assumption the agent made.
+None of these was assumed silently; each was a question put to me with a
+recommendation, and the answer is recorded here.
 
-- The tests pin what the code does, not what the README says, because the
-  invoices in production were produced by the code.
-- The showrooms run the Linux binary (the 2021 "runs on the linux box"
-  commit), so the Linux-only release workflow matches deployment. Windows
-  builds are noted as not covered.
-- The README is corrected because it is for developers; the help screen
-  inside the app is not, because staff see it.
-- The trade screen test uses a 6% salesman discount so it is not confused
-  with the 4% fleet rate coming in TICKET-142.
-- One real approval gate on the release (a `production` environment with a
-  required reviewer) rather than simulated dev/test/qa/prd stages. The real
-  deployment is a person copying a binary to the fileserver; a workflow can
-  gate the publish honestly, but it cannot deploy, so it should not pretend to.
-- After reading another approach to the same challenge, two of its rules
-  were adopted into `AGENTS.md` because they were missing here: data files
-  must stay loadable by the previous binary too (rollback), and a written
-  order of what to trust when sources disagree. Its spec framework, simulated
-  deployment stages and source-tree move were left out on purpose.
-- Releases are automatic from a merge to master, but tagging and publishing
-  happen in one workflow run: a tag pushed by a workflow with the built-in
-  token does not trigger other workflows, so a separate "tag on merge" step
-  could never start the release. A version bump is required only for pull
-  requests that change `.c` or `.h` files, so docs do not force a
-  staff-visible version change. Rollback marks an earlier release as latest
-  and says the fileserver copy is manual, rather than pretending to deploy.
-  No tag existed when this landed, so the first merge to master offered
-  v2.3 for approval: that is the intended baseline release, made from the
-  unchanged program.
-- The reviewer agent caught that the version gate was a no-op on GitHub:
-  on a shallow pull-request checkout `git diff A...B` has no merge base,
-  git fails, and the pipe into grep hid the failure, so the step passed. It
-  reproduced this with a simulated checkout. Fixed with a two-dot diff and
-  an explicit exit on git failure, plus a concurrency group on the release
-  and a refusal to release from a dispatched non-master branch.
-- Plain C assertions rather than a test framework: the thing under test is
-  one function, and vendoring Unity would be the largest dependency in the
-  repo.
+- Tests pin what the code does, not the README, because production invoices
+  came from the code.
+- Showrooms run the Linux binary (2021 "runs on the linux box" commit), so
+  the Linux-only release matches deployment; Windows builds are noted as not
+  covered.
+- One real approval gate on the release rather than simulated
+  dev/test/qa/prd stages: the real deployment is a person copying a binary
+  to the fileserver, and a workflow can gate that honestly but cannot do it.
+  Rollback marks an earlier release as latest and says the copy is manual.
+- Tagging and publishing share one workflow run because a tag pushed by a
+  workflow with the built-in token does not trigger other workflows. A
+  version bump is required only for pull requests that change `.c`/`.h`
+  files, so docs do not force a staff-visible version change. With no tag
+  present, the first merge offered v2.3, the intended baseline release.
+- Plain C assertions rather than a framework: one function under test.
+- After reading another candidate's approach, two rules were adopted into
+  `AGENTS.md`: data files must stay loadable by the previous binary
+  (rollback), and a written order of what to trust. Its spec framework,
+  simulated deploy stages and source-tree move were left out on purpose.
 
-## TICKET-142
+## TICKET-142 (v2.4)
 
-To be completed when the ticket ships. Questions still to be answered before
-code is written (from `docs/CODEBASE.md` section 9): whether fleet and trade
-stack when a customer is both; whether the 4% is taken from the list price or
-after the trade discount; where the fleet line sits relative to the salesman
-discount; and whether the salesman discount is then applied to the price net
-of the fleet discount, as it is for trade.
+Built in five steps (plan: `docs/TICKET-142/TICKET-142_PLAN.md`: date mask
+for sale screens, customer flag and marking screen, pricing with tests
+written first, the line on quotes and invoices, docs and version), landed
+as a short series of whole-file commits that each build and pass: the plan
+with the date mask, the feature with its tests and the v2.4 bump, the docs,
+then follow-up doc fixes from review. The steps were implemented back to
+back in one tree, so one commit per step would have meant staging by hunk.
 
-## What I would do next with more time
+Decisions the ticket left open, answered before code was written:
 
-- A sell-vehicle screen test with the date masked, covering the invoice
-  preview and the saved invoice.
-- `-Werror` in the CI build step.
-- A Windows job in CI, since the developers are on Windows.
-- Fix the pre-existing `strtok` bug where an empty phone or email shifts the
-  following fields on load.
-- Correct the in-app help text once the product owner agrees the wording.
+- A sixth `fleet` column on customers rather than a new type letter, so a
+  trade customer can also be fleet and old files load unchanged.
+- Trade and fleet both come off the list price; the salesman discount
+  applies to the remainder, as it already did after the trade discount.
+- Customers menu option 4 to mark or unmark by ID, plus a Y/N question on
+  Add customer: the one staff-visible change, which the ticket asks for.
+- A twelfth invoice column holding the fleet part of the discount; `disc`
+  still holds the whole discount, so totals and existing rows are untouched
+  and old invoices display as before.
+
+Rollback checked by building v2.3 from master and running it on v2.4 files:
+it loads everything, shows a fleet invoice with one Discounts line and the
+same total, and drops the customer `fleet` column when it saves customers
+(it would likewise drop the invoice `fleet_disc` column if it saved
+invoices; `disc` and `total` are untouched), so after a rollback nobody is
+fleet and no money is lost. The pre-existing empty-phone
+field-shift bug is unchanged.
+
+Every expected screen was read against `calc.c` before being recorded; the
+pricing tests were seen failing to compile before `calc.c` changed.
+
+## Next, with more time
+
+`-Werror` in CI; a Windows CI job; fix the `strtok` empty-field bug; correct
+the in-app help text once the product owner agrees the wording; a Windows
+build in the release if the showrooms ever need one.

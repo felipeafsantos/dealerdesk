@@ -22,6 +22,9 @@ set -u
 DIR=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$DIR/../.." && pwd)
 
+# a sale is dated today; mask it so sale cases compare equal on any day
+today=$(date +%F)
+
 BIN=${1:-"$ROOT/dealerdesk"}
 if [ ! -x "$BIN" ] && [ -x "$BIN.exe" ]; then
     BIN="$BIN.exe"
@@ -53,10 +56,13 @@ for input in "$DIR"/*.in; do
     (cd "$TMP" && "$BIN" < "$input") \
         | tr -d '\033\r' \
         | sed 's/\[2J\[H//g' \
+        | sed "s/$today/<TODAY>/g" \
         > "$TMP/$name.out"
 
     # the expected file is also CR-stripped in case it was checked out as CRLF
-    tr -d '\r' < "$DIR/$name.expected" > "$TMP/$name.expected"
+    tr -d '\r' < "$DIR/$name.expected" \
+        | sed "s/$today/<TODAY>/g" \
+        > "$TMP/$name.expected"
     if diff -u "$TMP/$name.expected" "$TMP/$name.out" > "$TMP/$name.diff"; then
         echo "PASS $name"
     else

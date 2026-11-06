@@ -1,0 +1,141 @@
+==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer 2008 is now a fleet customer.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer not found.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  ID    NAME                       PHONE          EMAIL                        TYPE
+  -----------------------------------------------------------------------------------
+  2001  Sarah Whitfield            07700 900412   s.whitfield@example.com      Retail
+  2002  Marlow Motors Ltd          01632 960118   buying@marlowmotors.example  Trade
+  2003  David Okafor               07700 900877   dokafor@example.net          Retail
+  2004  Hannah Price               07700 900233   hannah.price@example.org     Retail
+  2005  A1 Car Sales               01632 960455   trade@a1cars.example         Trade
+  2006  Tom Brennan                07700 900650   tbrennan@example.com         Retail
+  2007  Priya Nair                 07700 900931   priya.nair@example.net       Retail
+  2008  Greenway Taxis             01632 960702   fleet@greenwaytaxis.example  Fleet
+
+  8 customer(s)
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                               Fleet Customer
+==============================================================
+
+  Customer ID : 
+  Customer 2008 is no longer a fleet customer.
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  ID    NAME                       PHONE          EMAIL                        TYPE
+  -----------------------------------------------------------------------------------
+  2001  Sarah Whitfield            07700 900412   s.whitfield@example.com      Retail
+  2002  Marlow Motors Ltd          01632 960118   buying@marlowmotors.example  Trade
+  2003  David Okafor               07700 900877   dokafor@example.net          Retail
+  2004  Hannah Price               07700 900233   hannah.price@example.org     Retail
+  2005  A1 Car Sales               01632 960455   trade@a1cars.example         Trade
+  2006  Tom Brennan                07700 900650   tbrennan@example.com         Retail
+  2007  Priya Nair                 07700 900931   priya.nair@example.net       Retail
+  2008  Greenway Taxis             01632 960702   fleet@greenwaytaxis.example  Retail
+
+  8 customer(s)
+
+  Press ENTER to continue...==============================================================
+  DEALERDESK v2.4                                    Customers
+==============================================================
+
+  1. List customers
+  2. Add customer
+  3. Find customer
+  4. Mark / unmark fleet customer
+  0. Back
+
+  Option: ==============================================================
+  DEALERDESK v2.4                                    Main Menu
+==============================================================
+
+  1. Stock
+  2. Customers
+  3. Quote
+  4. Sell vehicle
+  5. Invoices
+  9. Help
+  0. Exit
+
+  Option: 
+  Goodbye.
