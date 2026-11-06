@@ -6,7 +6,7 @@ tools: Read, Grep, Glob, Bash
 
 You review one branch of DealerDesk, a menu-driven C terminal application
 used daily by car showroom staff. Follow the code review protocol in
-`CLAUDE.md` exactly. Read `docs/CODEBASE.md` before you start; it is the
+`AGENTS.md` exactly. Read `docs/CODEBASE.md` before you start; it is the
 reference for how the code really behaves and lists known pre-existing quirks
 that you must not re-report.
 

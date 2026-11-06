@@ -42,9 +42,10 @@ was left alone.
 
 ## How I worked with the agent
 
-Claude Code, driven through `CLAUDE.md` and a `reviewer` agent, both
-committed. The rules I gave it: never commit or push (I do those by hand, so
-every commit message was reviewed by me first); the code, not the README, is
+Claude Code, driven through `AGENTS.md` (the rules any tool reads;
+`CLAUDE.md` imports it) and a `reviewer` agent, all committed. The rules I
+gave it: never commit or push (I do those by hand, so every commit message
+was reviewed by me first); the code, not the README, is
 the source of truth; staff must notice nothing; and when something is
 unclear, ask rather than assume. The last rule replaced the agent's own
 instinct to "make a reasonable call and write it down".
