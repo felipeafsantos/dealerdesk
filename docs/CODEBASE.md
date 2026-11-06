@@ -34,11 +34,11 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
 
 | File | Lines | Role |
 |---|---|---|
-| `main.c` | 540 | All menus and screens. Defines the global tables and ID counters (`main.c:18-27`). |
-| `calc.c`, `calc.h` | 45 / 20 | Pricing. `QUOTE` struct (`calc.h:4-15`), `rnd2()` (`calc.c:18`), `calc_quote()` (`calc.c:23`). Pure functions, no globals, no I/O. |
-| `dbfile.c`, `dbfile.h` | 229 / 10 | Load and save the four flat files. `load_all()` (`dbfile.c:160`), `save_stock/customers/invoices/ids()` (`dbfile.c:168-233`). |
+| `main.c` | 573 | All menus and screens. Defines the global tables and ID counters (`main.c:18-27`). |
+| `calc.c`, `calc.h` | 51 / 22 | Pricing. `QUOTE` struct (`calc.h:4-16`), `rnd2()` (`calc.c:19`), `calc_quote()` (`calc.c:24`). Pure functions, no globals, no I/O. |
+| `dbfile.c`, `dbfile.h` | 234 / 10 | Load and save the four flat files. `load_all()` (`dbfile.c:160`), `save_stock/customers/invoices/ids()` (`dbfile.c:168-233`). |
 | `screen.c`, `screen.h` | 70 / 12 | Terminal helpers: `cls`, `header`, `read_line`, `read_int`, `read_money`, `pause_enter`, `confirm`. |
-| `globals.h` | 61 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
+| `globals.h` | 63 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
 
 Limits (`globals.h:7-9`): 500 vehicles, 500 customers, 2000 invoices. Each
 "add" screen refuses when the table is full (`main.c:87`, `:236`, `:376`).
@@ -215,7 +215,7 @@ invoice=50233
 
 ## 6. Pricing rules as implemented
 
-Everything is in `calc_quote()` (`calc.c:23-45`), called only from
+Everything is in `calc_quote()` (`calc.c:24-51`), called only from
 `build_quote()` (`main.c:354`) with the vehicle's list price, the customer type
 character, the typed discount percentage and the typed trade-in value.
 
@@ -232,7 +232,7 @@ character, the typed discount percentage and the typed trade-in value.
 | Trade-in | `calc.c:48` | Taken as typed, not validated, may be negative or exceed the total. |
 | Total | `calc.c:50` | `net + delivery + vat + reg_fee - tradein`. |
 
-Rounding: `rnd2(x) = floor(x * 100 + 0.5) / 100` (`calc.c:18-21`), i.e. round
+Rounding: `rnd2(x) = floor(x * 100 + 0.5) / 100` (`calc.c:19-22`), i.e. round
 half up at the penny.
 
 Relevant history (`git log`): `9dc21bb` "vat on the discounted price not list

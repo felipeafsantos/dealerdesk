@@ -86,9 +86,13 @@ recommendation, and the answer is recorded here.
 
 ## TICKET-142 (v2.4)
 
-Five commits that each build and pass: date mask for sale screens, customer
-flag and marking screen, pricing with tests written first, the line on
-quotes and invoices, docs and version. Plan: `docs/TICKET-142/TICKET-142_PLAN.md`.
+Built in five steps (plan: `docs/TICKET-142/TICKET-142_PLAN.md`: date mask
+for sale screens, customer flag and marking screen, pricing with tests
+written first, the line on quotes and invoices, docs and version), landed
+as four commits that each build and pass: the plan with the date mask, the
+feature with its tests and the v2.4 bump, the docs, a heading rename. The
+steps were implemented back to back in one tree, so splitting them into
+five commits would have meant staging by hunk; I chose whole-file commits.
 
 Decisions the ticket left open, answered before code was written:
 
