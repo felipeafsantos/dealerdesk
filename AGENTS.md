@@ -11,6 +11,9 @@ old README were wrong.
 
 ## Working rules
 
+- **Every piece of work starts on its own branch from an up-to-date
+  `master`** and lands by pull request. Never edit on `master`, never reuse a
+  merged branch. One topic per branch.
 - **Never run `git commit` or `git push` without asking first.** Each commit
   and each push needs its own explicit go-ahead. Prepare the diff and a
   drafted message, then ask.
@@ -21,6 +24,13 @@ old README were wrong.
   Do not change prompts, screen layouts, menu numbers or data file formats
   unless the task requires it. New data fields go at the end of a record so
   existing files load without conversion.
+- **Data files must stay compatible in both directions.** The new binary
+  loads every existing file without conversion, and the previous binary (the
+  rollback in `RELEASE.txt`) must still load files the new binary wrote
+  without losing or corrupting the fields it knows. Only append fields; never
+  reorder or repurpose them. A field the old binary does not know is dropped
+  on its next save; that is accepted, and must be stated in `NOTES.md` for
+  any new field.
 - **Run the program from the repository root.** It reads and writes `data/`
   relative to the working directory, and every action saves immediately.
   After a manual run, restore the sample data with `git checkout -- data`.
@@ -31,6 +41,16 @@ old README were wrong.
 - **Do not assume.** When the ticket, the code or the task is unclear, stop
   and ask for clarification before acting. Once a question is answered, record
   the decision in `NOTES.md` so reviewers can see it.
+
+## What to trust
+
+When sources disagree, trust them in this order:
+
+1. The invoices in `data/invoices.dat` and what the compiled program does.
+2. Git history, for why (`git log -p -- calc.c`).
+3. `docs/CODEBASE.md`.
+4. Anything else. Comments, the in-app Help screen and the old README have
+   all been wrong here; verify before relying on them.
 
 ## Build and test
 

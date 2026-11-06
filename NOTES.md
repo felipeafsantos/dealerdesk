@@ -86,6 +86,11 @@ Each of these was a question I answered, not an assumption the agent made.
   required reviewer) rather than simulated dev/test/qa/prd stages. The real
   deployment is a person copying a binary to the fileserver; a workflow can
   gate the publish honestly, but it cannot deploy, so it should not pretend to.
+- After reading another approach to the same challenge, two of its rules
+  were adopted into `AGENTS.md` because they were missing here: data files
+  must stay loadable by the previous binary too (rollback), and a written
+  order of what to trust when sources disagree. Its spec framework, simulated
+  deployment stages and source-tree move were left out on purpose.
 - Plain C assertions rather than a test framework: the thing under test is
   one function, and vendoring Unity would be the largest dependency in the
   repo.
