@@ -1,0 +1,38 @@
+name: Release
+
+# Pushing a tag like v2.4 builds the Linux binary, runs every test, and
+# publishes a GitHub Release with the binary attached. See RELEASE.txt.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build
+        run: make
+
+      - name: Test
+        run: make test
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp dealerdesk "dist/dealerdesk-${{ github.ref_name }}-linux-x86_64"
+          cd dist && sha256sum * > SHA256SUMS
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" dist/* \
+            --title "DealerDesk ${{ github.ref_name }}" \
+            --generate-notes

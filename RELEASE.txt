@@ -1,12 +1,33 @@
 HOW TO RELEASE DEALERDESK
 =========================
 
-1. Build on your machine (see README)
-2. Test it a bit: add a car, do a quote, sell a car, check the invoice looks right.
-   PUT THE DATA FILES BACK AFTERWARDS!!
-3. On \\fileserver01\apps\dealerdesk\ rename dealerdesk to dealerdesk.old
-4. Copy the new dealerdesk binary there
-5. Email the showrooms that a new version is out
-6. If something breaks, copy dealerdesk.old back
+Releases are built by GitHub Actions from a version tag. Nothing is built
+or tested by hand any more.
+
+1. Make sure the change is on master and the CI run for it is green
+   (GitHub -> Actions -> CI). CI builds the program and runs all the tests
+   on every push.
+2. Tag the commit and push the tag:
+
+       git tag -a v2.4 -m "DealerDesk 2.4"
+       git push origin v2.4
+
+3. The "Release" workflow builds the Linux binary, runs every test again,
+   and publishes a GitHub Release named after the tag with the binary and
+   a SHA256SUMS file attached (GitHub -> Releases). If a test fails, no
+   release is published.
+4. Download the binary from the release page. On \\fileserver01\apps\dealerdesk\
+   rename dealerdesk to dealerdesk.old, then copy the new binary there as
+   dealerdesk.
+5. Email the showrooms that a new version is out.
+6. If something breaks, copy dealerdesk.old back. Every earlier release can
+   also be downloaded again from the Releases page.
+
+Notes
+
+- The tag is the release number. The version shown on screen comes from
+  screen.c and is changed by hand in the same commit when it moves on.
+- The workflow produces the Linux binary only. Windows builds are not
+  covered by it.
 
 Last release: 2.3 (2021-04-08)  - P.
