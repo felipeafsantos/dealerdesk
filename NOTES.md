@@ -91,6 +91,22 @@ Each of these was a question I answered, not an assumption the agent made.
   must stay loadable by the previous binary too (rollback), and a written
   order of what to trust when sources disagree. Its spec framework, simulated
   deployment stages and source-tree move were left out on purpose.
+- Releases are automatic from a merge to master, but tagging and publishing
+  happen in one workflow run: a tag pushed by a workflow with the built-in
+  token does not trigger other workflows, so a separate "tag on merge" step
+  could never start the release. A version bump is required only for pull
+  requests that change `.c` or `.h` files, so docs do not force a
+  staff-visible version change. Rollback marks an earlier release as latest
+  and says the fileserver copy is manual, rather than pretending to deploy.
+  No tag existed when this landed, so the first merge to master offered
+  v2.3 for approval: that is the intended baseline release, made from the
+  unchanged program.
+- The reviewer agent caught that the version gate was a no-op on GitHub:
+  on a shallow pull-request checkout `git diff A...B` has no merge base,
+  git fails, and the pipe into grep hid the failure, so the step passed. It
+  reproduced this with a simulated checkout. Fixed with a two-dot diff and
+  an explicit exit on git failure, plus a concurrency group on the release
+  and a refusal to release from a dispatched non-master branch.
 - Plain C assertions rather than a test framework: the thing under test is
   one function, and vendoring Unity would be the largest dependency in the
   repo.

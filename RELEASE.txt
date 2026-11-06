@@ -1,34 +1,37 @@
 HOW TO RELEASE DEALERDESK
 =========================
 
-Releases are built by GitHub Actions from a version tag. Nothing is built
-or tested by hand any more.
+Releases are built by GitHub Actions. Nothing is built or tested by hand.
 
-1. Make sure the change is on master and the CI run for it is green
-   (GitHub -> Actions -> CI). CI builds the program and runs all the tests
-   on every push.
-2. Tag the commit and push the tag:
-
-       git tag -a v2.4 -m "DealerDesk 2.4"
-       git push origin v2.4
-
-3. The "Release" workflow waits for approval (GitHub -> Actions -> the run
-   -> Review deployments -> production), then builds the Linux binary, runs
-   every test again, and publishes a GitHub Release named after the tag with
-   the binary and a SHA256SUMS file attached (GitHub -> Releases). If a test
-   fails, no release is published. The approvers are the required reviewers
-   of the "production" environment in the repository settings.
+1. In the pull request that changes the program, bump the version in
+   screen.c (the "DEALERDESK vX.Y" header) and in the README title. CI
+   refuses to merge a program change without a bump. Docs-only changes do
+   not need one.
+2. Merge the pull request. The "Release" workflow sees the new version and
+   waits for approval (GitHub -> Actions -> Release -> the run -> Review
+   deployments -> production). The approvers are the required reviewers of
+   the "production" environment in the repository settings.
+3. Approve. The workflow builds the Linux binary, runs every test, creates
+   the version tag and publishes a GitHub Release named after it with the
+   binary and a SHA256SUMS file attached (GitHub -> Releases). If a test
+   fails, no tag and no release are made.
 4. Download the binary from the release page. On \\fileserver01\apps\dealerdesk\
    rename dealerdesk to dealerdesk.old, then copy the new binary there as
    dealerdesk.
 5. Email the showrooms that a new version is out.
-6. If something breaks, copy dealerdesk.old back. Every earlier release can
-   also be downloaded again from the Releases page.
+6. If something breaks: GitHub -> Actions -> Rollback -> Run workflow ->
+   enter the previous version (for example v2.3) -> approve. That makes the
+   previous release the "latest" one again. Download its binary and copy it
+   to the fileserver as in step 4, or copy dealerdesk.old back.
 
 Notes
 
-- The tag is the release number. The version shown on screen comes from
-  screen.c and is changed by hand in the same commit when it moves on.
+- Only one release runs at a time. If two pull requests are merged before
+  the first release is approved, the second waits for the first.
+- "make version" prints the version in the code. The tag is always equal to
+  it. A tag pushed by hand (git push origin v2.4) goes through the same
+  checks and approval, and is refused if it is not on master or does not
+  match the code.
 - The workflow produces the Linux binary only. Windows builds are not
   covered by it.
 
