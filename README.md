@@ -1,6 +1,6 @@
 This standard disclaimer states that the work is entirely fictional and any resemblance to real people, places, or events is coincidental.
 
-DEALERDESK v2.1
+DEALERDESK v2.3
 ===============
 
 Dealer management for the showroom: stock, customers, quotes and invoices.
@@ -26,9 +26,18 @@ You need a C compiler (gcc or clang). From the repository root:
 BUILD
 -----
 
-    gcc -o dealerdesk main.c dbfile.c screen.c report.c
+    make            equivalent to: gcc -o dealerdesk *.c -lm
+    make test       builds and runs the unit tests and the screen tests
+    make clean
 
-(Windows releases are built with the Borland compiler on the old build PC.)
+(On Windows with the WinLibs/MinGW toolchain use mingw32-make, and run
+make test from Git Bash: the screen tests need sh.)
+
+Developers: docs/CODEBASE.md describes the code, the data files and the
+pricing rules as the code implements them. CI builds and tests every push.
+
+Windows releases used to be built with the Borland compiler on the old build
+PC. Releases are now built by CI on Linux, see RELEASE.txt.
 
 
 RUN
@@ -36,7 +45,7 @@ RUN
 
     ./dealerdesk
 
-Data files are read from C:\DEALERDESK\DATA
+Data files are read from ./data, relative to the directory you run it from
 
     stock.dat       vehicles
     customers.dat   customers
@@ -54,20 +63,21 @@ MENU
     3. Quote
     4. Sell vehicle
     5. Invoices
-    6. Reports (monthly sales, margin per vehicle)
+    9. Help
     0. Exit
 
 
 PRICING RULES
 -------------
 
-* VAT (20%) is calculated on the list price. Discounts are then taken off
-  the VAT inclusive price.
-* Trade customers get a 5% trade discount.
-* Salesman discount is up to 10%. Anything above 10% asks for a manager PIN.
-* Delivery (150.00) and first registration (55.00) are added to every sale.
-  Both are VAT exempt.
+* Trade customers get a 10% trade discount off the list price.
+* Salesman discount is up to 15% and is taken off the price after the trade
+  discount. There is no manager PIN.
+* VAT (20%) is calculated on the net price plus delivery.
+* Delivery (150.00) is added to every sale and is VATable.
+* First registration (55.00) is added to every sale and is outside VAT.
 * Trade-in value is taken off the final total.
+* Every amount is rounded to the penny.
 
 
 RELEASE
