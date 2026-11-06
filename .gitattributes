@@ -3,3 +3,5 @@
 tests/e2e/*.in        text eol=lf
 tests/e2e/*.expected  text eol=lf
 tests/e2e/run.sh      text eol=lf
+# shell scripts run by CI on Linux
+.github/scripts/*.sh  text eol=lf
