@@ -12,10 +12,12 @@ or tested by hand any more.
        git tag -a v2.4 -m "DealerDesk 2.4"
        git push origin v2.4
 
-3. The "Release" workflow builds the Linux binary, runs every test again,
-   and publishes a GitHub Release named after the tag with the binary and
-   a SHA256SUMS file attached (GitHub -> Releases). If a test fails, no
-   release is published.
+3. The "Release" workflow waits for approval (GitHub -> Actions -> the run
+   -> Review deployments -> production), then builds the Linux binary, runs
+   every test again, and publishes a GitHub Release named after the tag with
+   the binary and a SHA256SUMS file attached (GitHub -> Releases). If a test
+   fails, no release is published. The approvers are the required reviewers
+   of the "production" environment in the repository settings.
 4. Download the binary from the release page. On \\fileserver01\apps\dealerdesk\
    rename dealerdesk to dealerdesk.old, then copy the new binary there as
    dealerdesk.
