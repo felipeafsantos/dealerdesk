@@ -1,0 +1,57 @@
+name: Rollback
+
+# Makes an earlier release the "latest" one on the Releases page, so the
+# download link points at it again. That is all a workflow can do here: the
+# program is deployed by a person copying the binary to the fileserver, so
+# the copy is still done by hand (RELEASE.txt step 6).
+#
+# Actions -> Rollback -> Run workflow -> version (for example v2.3).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release to roll back to, for example v2.3"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-24.04
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.version }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TARGET: ${{ inputs.version }}
+    steps:
+      - name: Check the release exists
+        run: |
+          if ! gh release view "$TARGET" --repo "$GITHUB_REPOSITORY" --json isDraft,isPrerelease > release.json; then
+            echo "::error::no release named $TARGET"
+            exit 1
+          fi
+          if grep -q '"isDraft":true\|"isPrerelease":true' release.json; then
+            echo "::error::$TARGET is a draft or pre-release"
+            exit 1
+          fi
+
+      - name: Mark it as the latest release
+        run: |
+          previous=$(gh release list --repo "$GITHUB_REPOSITORY" --json tagName,isLatest \
+                     --jq '.[] | select(.isLatest) | .tagName')
+          gh release edit "$TARGET" --repo "$GITHUB_REPOSITORY" --latest
+          note="Marked as latest by rollback on $(date -u +%F), replacing ${previous:-nothing}. Download this binary and copy it to the fileserver (RELEASE.txt step 6)."
+          body=$(gh release view "$TARGET" --repo "$GITHUB_REPOSITORY" --json body --jq .body)
+          printf '%s\n\n%s\n' "$body" "$note" > notes.md
+          gh release edit "$TARGET" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
+          {
+            echo "## Rolled back to $TARGET"
+            echo
+            echo "Previous latest: ${previous:-none}"
+            echo
+            echo "Download: https://github.com/$GITHUB_REPOSITORY/releases/tag/$TARGET"
+          } >> "$GITHUB_STEP_SUMMARY"
