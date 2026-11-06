@@ -4,6 +4,7 @@
 #   make test     build and run the unit tests (tests/test_calc.c) and the
 #                 end-to-end screen tests (tests/e2e/run.sh)
 #   make clean
+#   make version  print the version from screen.c (the release tag)
 #
 # On Windows with the WinLibs/MinGW toolchain use mingw32-make, from Git Bash
 # for "make test" (the screen tests need sh).
@@ -41,4 +42,9 @@ test: $(TEST) $(BIN)
 clean:
 	rm -f dealerdesk dealerdesk.exe tests/test_calc tests/test_calc.exe
 
-.PHONY: all test clean
+# Prints the version from the screen header, for example v2.3. The release
+# workflow tags releases with it.
+version:
+	@grep -o -E 'DEALERDESK v[0-9]+\.[0-9]+' screen.c | head -1 | cut -d' ' -f2
+
+.PHONY: all test clean version

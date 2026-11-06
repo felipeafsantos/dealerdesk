@@ -1,27 +1,94 @@
 name: Release
 
-# Pushing a tag like v2.4 builds the Linux binary, runs every test, and
-# publishes a GitHub Release with the binary attached. See RELEASE.txt.
+# How a release happens (see RELEASE.txt):
+#
+#   1. A pull request that changes the program bumps the version in screen.c.
+#   2. Merging it pushes master. The "check" job reads the version with
+#      "make version"; if no tag with that version exists there is something
+#      to release, otherwise the run ends and says so.
+#   3. The "release" job waits for approval on the "production" environment,
+#      then builds, runs every test, creates the tag and publishes a GitHub
+#      Release with the Linux binary and a SHA256SUMS file.
+#
+# Tagging and publishing happen in this one run on purpose: a tag pushed by a
+# workflow with the built-in token does not trigger other workflows, so a
+# separate "tag on merge" workflow could never start this one.
+#
+# A tag pushed by hand (git push origin v2.4) also runs this workflow. It is
+# released only if the tag is on master and matches the version in screen.c.
 
 on:
   push:
-    tags:
-      - "v*"
+    branches: [master]
+    tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+# One release at a time: a second merge before the first is approved would
+# otherwise also wait for approval and then fail on the tag that the first
+# run created.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
-  release:
+  check:
     runs-on: ubuntu-24.04
-    # The "production" environment has a required reviewer (repository
-    # settings -> Environments), so a pushed tag waits for a person to approve
-    # before anything is published. The build and tests run after approval.
-    environment:
-      name: production
-      url: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}
+    outputs:
+      version: ${{ steps.decide.outputs.version }}
+      release: ${{ steps.decide.outputs.release }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Decide whether there is anything to release
+        id: decide
+        run: |
+          version=$(make -s version)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "version in screen.c: $version"
+
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            # tag guard: the tag must be the code's version and be on master
+            if [ "$GITHUB_REF_NAME" != "$version" ]; then
+              echo "::error::tag $GITHUB_REF_NAME does not match the version in screen.c ($version)"
+              exit 1
+            fi
+            if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/master; then
+              echo "::error::tag $GITHUB_REF_NAME is not on master"
+              exit 1
+            fi
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          elif [ "$GITHUB_REF_NAME" != master ]; then
+            # workflow_dispatch can be started from any branch
+            echo "::error::releases are made from master, not $GITHUB_REF_NAME"
+            exit 1
+          elif [ -n "$(git tag -l "$version")" ]; then
+            echo "tag $version already exists: nothing to release"
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$version has no tag yet: release it"
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  release:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-24.04
+    # The "production" environment has a required reviewer (repository
+    # settings -> Environments), so this job waits for a person to approve.
+    environment:
+      name: production
+      url: https://github.com/${{ github.repository }}/releases/tag/${{ needs.check.outputs.version }}
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Build
         run: make
@@ -32,13 +99,22 @@ jobs:
       - name: Package
         run: |
           mkdir -p dist
-          cp dealerdesk "dist/dealerdesk-${{ github.ref_name }}-linux-x86_64"
+          cp dealerdesk "dist/dealerdesk-$VERSION-linux-x86_64"
           cd dist && sha256sum * > SHA256SUMS
 
-      - name: Create GitHub Release
+      - name: Create the tag
+        if: github.ref_type != 'tag'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$VERSION" -m "DealerDesk $VERSION"
+          git push origin "$VERSION"
+
+      - name: Publish the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ github.ref_name }}" dist/* \
-            --title "DealerDesk ${{ github.ref_name }}" \
-            --generate-notes
+          gh release create "$VERSION" dist/* \
+            --title "DealerDesk $VERSION" \
+            --generate-notes \
+            --latest

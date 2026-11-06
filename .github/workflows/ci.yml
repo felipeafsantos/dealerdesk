@@ -10,6 +10,26 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # A pull request that changes the program (a .c or .h file in the
+      # repository root, which is what the build compiles) must bump the
+      # version in screen.c, because merging it makes a release (see
+      # RELEASE.txt). Docs, tests and workflow changes do not need a bump.
+      #
+      # HEAD is the PR merge commit, so a two-dot diff against the base tip is
+      # exactly the PR's changes. (Three-dot needs a merge base, which a
+      # shallow checkout does not have.) --tags lets the script see existing
+      # tags.
+      - name: Version bump when the program changes
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch --depth=1 --tags origin "$GITHUB_BASE_REF"
+          changed=$(git diff --name-only FETCH_HEAD HEAD) || exit 1
+          if printf '%s\n' "$changed" | grep -E '^[^/]+\.[ch]$'; then
+            sh .github/scripts/check-version.sh FETCH_HEAD
+          else
+            echo "no .c or .h file in the root changed, version bump not required"
+          fi
+
       - name: Build
         run: make
 

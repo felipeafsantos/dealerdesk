@@ -64,6 +64,15 @@ On Windows with the WinLibs toolchain use `mingw32-make` in place of `make`,
 and run `mingw32-make test` from Git Bash: the screen tests need `sh`.
 CI (`.github/workflows/ci.yml`) runs the same targets on Ubuntu.
 
+## Versioning
+
+The version is the `DEALERDESK vX.Y` string in `screen.c` (and the README
+title); `make version` prints it. Bump it, once, in the pull request that
+changes any `.c` or `.h` file: CI refuses a program change without a bump,
+and merging the bump makes a release (`RELEASE.txt`). Docs, tests and
+workflow changes do not bump it. The release tag is always equal to the
+version.
+
 ## Code review protocol
 
 When asked to review a branch:
