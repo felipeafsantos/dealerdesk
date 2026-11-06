@@ -27,7 +27,7 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
   After experimenting, restore the sample data with `git checkout -- data`.
 * There is exactly one `main()` (`main.c:509`), so `*.c` is a valid build. Any
   extra `.c` file placed in the root would be swept into the build, which is
-  why tests live under `tests/`.
+  why tests live under `tests/` (see section 10).
 * Version string "v2.3" is printed by `header()` at `screen.c:18`.
 
 ## 2. Source layout
@@ -35,10 +35,10 @@ gcc -o dealerdesk *.c -lm      # -lm: calc.c uses floor()
 | File | Lines | Role |
 |---|---|---|
 | `main.c` | 540 | All menus and screens. Defines the global tables and ID counters (`main.c:18-27`). |
-| `calc.c`, `calc.h` | 46 / 21 | Pricing. `QUOTE` struct (`calc.h:4-15`), `rnd2()` (`calc.c:18`), `calc_quote()` (`calc.c:23`). Pure functions, no globals, no I/O. |
+| `calc.c`, `calc.h` | 45 / 20 | Pricing. `QUOTE` struct (`calc.h:4-15`), `rnd2()` (`calc.c:18`), `calc_quote()` (`calc.c:23`). Pure functions, no globals, no I/O. |
 | `dbfile.c`, `dbfile.h` | 229 / 10 | Load and save the four flat files. `load_all()` (`dbfile.c:156`), `save_stock/customers/invoices/ids()` (`dbfile.c:164-229`). |
 | `screen.c`, `screen.h` | 70 / 12 | Terminal helpers: `cls`, `header`, `read_line`, `read_int`, `read_money`, `pause_enter`, `confirm`. |
-| `globals.h` | 62 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
+| `globals.h` | 61 | `VEHICLE`, `CUSTOMER`, `INVOICE` structs, table limits, status codes, `extern` declarations. |
 
 Limits (`globals.h:7-9`): 500 vehicles, 500 customers, 2000 invoices. Each
 "add" screen refuses when the table is full (`main.c:87`, `:236`, `:376`).
@@ -253,6 +253,10 @@ discount, the "by hand" fleet discount that TICKET-142 describes.
 
 ## 7. Docs vs code discrepancies
 
+README line numbers below are those of the README **before** it was
+corrected (`origin/master`); the current README no longer contains the wrong
+statements.
+
 | Topic | Docs say | Code does | Where |
 |---|---|---|---|
 | Trade discount | 5% | 10% | `README.md:66`, `main.c:500`, `calc.c:6` vs `calc.c:29`; confirmed by invoice 50231 |
@@ -265,9 +269,10 @@ discount, the "by hand" fleet discount that TICKET-142 describes.
 | Build line | `main.c dbfile.c screen.c report.c` | `report.c` does not exist, `calc.c` and `-lm` are needed | `README.md:29` |
 | Data location | `C:\DEALERDESK\DATA` | `./data/` relative to the working directory | `README.md:39`, `dbfile.c:4` vs `dbfile.c:13` |
 
-The README and help screen are staff-facing and are **not** changed by this
-document; the brief says staff should notice nothing apart from the new
-feature. Correcting them is a separate decision.
+The README has since been corrected against this table (it is a developer
+document). The help screen inside the app (`main.c:495-505`) is staff-facing
+and is left as it is; the brief says staff should notice nothing apart from
+the new feature.
 
 ## 8. Known quirks and risks
 
@@ -313,3 +318,36 @@ Facts the implementation has to respect. Decisions are not made here.
 * **Regression guard.** Non-fleet quotes and invoices must be unchanged to
   the penny. The three sample invoices and the worked example above are the
   reference values.
+
+## 10. Tests
+
+`make test` runs two layers, and CI runs both plus a smoke run on every push.
+
+**Unit tests** (`tests/test_calc.c`). Plain C with a `CHECK` macro, no
+framework. They link `calc.c` alone, since pricing has no other dependency,
+and compare money to the penny. The expected values are the three invoices in
+`data/invoices.dat`, so the tests pin the pricing rules as the code
+implements them, not as the README used to describe them. The other cases
+cover the discount clamp, the salesman-after-trade order, the fixed fees, the
+VAT base, the trade-in and `rnd2`. A failing check prints `file:line` and the
+actual and expected values, and the program exits 1.
+
+**Screen tests** (`tests/e2e/`). `run.sh` runs the built binary with each
+`<case>.in` on stdin inside a temporary copy of `data/`, strips the ANSI
+clear-screen sequence and any CR, and diffs the whole output against
+`<case>.expected`. They cover what the unit tests cannot: loading the data
+files, the lookups, and the exact lines and labels printed. The repository's
+`data/` is never written. `.gitattributes` keeps these files LF on every
+platform because the comparison is byte for byte.
+
+**Adding a screen case.** Write `<case>.in` as the keystrokes a user would
+type, one per line, including the blank line for every "Press ENTER" and a
+final `0` to exit. Run the binary by hand with it, check every number on the
+screen against `calc.c`, and only then save the output as `<case>.expected`.
+Never generate an expected file without checking it: a wrong expected file
+pins a bug.
+
+**Not covered, and why.** Selling a vehicle writes an invoice dated from the
+wall clock, so its output is not deterministic without masking; the stock,
+customer and invoice list screens are not exercised. The CI smoke run only
+proves that starting the program and exiting does not rewrite `data/`.
