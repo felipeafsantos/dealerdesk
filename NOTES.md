@@ -59,7 +59,10 @@ rebuilds, re-runs the tests and recomputes every pinned number.
   the README was corrected. Same lesson each time: run it, do not trust the
   diff.
 
-## Decisions
+## Assumptions and decisions
+
+None of these was assumed silently; each was a question put to me with a
+recommendation, and the answer is recorded here.
 
 - Tests pin what the code does, not the README, because production invoices
   came from the code.
